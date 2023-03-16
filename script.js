@@ -7,7 +7,7 @@ const gameState = {
     [null, null, null],
   ],
   currentPlayerIndex: 0,
-  gameStatus: "playing",
+  singlePlayerMode: "off",
 };
 
 const board = document.querySelector(".board");
@@ -134,9 +134,10 @@ function findsWinner(array) {
 }
 
 function checksTie() {
-  for (let i = 0; i < gameBoard.length; i++) {
-    for (let j = 0; j < gameBoard[i].length; j++) {
-      const cell = gameBoard[i][j];
+  console.log(gameState.board);
+  for (let i = 0; i < gameState.board.length; i++) {
+    for (let j = 0; j < gameState.board[i].length; j++) {
+      const cell = gameState.board[i][j];
       if (cell === null) {
         return;
       }
@@ -165,6 +166,26 @@ function resetBoard(event) {
   }
   const endMessage = document.querySelector(".game-end-message");
     endMessage.remove()
+    board.addEventListener("click", addPlayerMark);
+    gameState.currentPlayerIndex = 0;
 }
 
 button.addEventListener("click", resetBoard);
+
+if(gameState.singlePlayerMode === "on") {
+  singlePlayerMode()
+}
+
+function singlePlayerMode() {
+  const computerName = "Computer"
+  playerO.innerText = "Player O: Computer"
+  if(gameState.playerNames[0]) {
+    gameState.playerNames.push(computerName)} 
+    if(gameState.currentPlayerIndex === 1) {
+      
+    }
+}
+const singlePlayerModeButton = document.querySelector("single-player-mode-button");
+singlePlayerModeButton.addEventListener("click", (event) => {
+  gameState.singlePlayerMode === "on"
+})
