@@ -7,23 +7,27 @@ const gameState = {
     [null, null, null],
   ],
   currentPlayerIndex: 0,
-  singlePlayerMode: "off",
+  singlePlayerMode: false,
+  isWinner : false,
 };
 
 const board = document.querySelector(".board");
 const playersDiv = document.querySelector("#players");
 const playerX = document.querySelector("#player-x");
 const playerO = document.querySelector("#player-o");
-const form = document.querySelector("form");
+const form = document.querySelector("form"); 
 
-form.addEventListener("submit", (event) => {
+function submitForm (event) {
   event.preventDefault();
   const playerName = event.target[0].value;
-  gameState.playerNames.push(playerName);
+  if(gameState.playerNames.length < 2) 
+  {gameState.playerNames.push(playerName);}
   console.log(gameState);
   renderPlayers();
   event.target[0].value = "";
-});
+}
+
+form.addEventListener("submit", submitForm);
 
 function renderPlayers() {
   playerX.innerText = `Player X: ${gameState.playerNames[0]}`;
@@ -57,6 +61,12 @@ function addPlayerMark(event) {
   switchPlayers();
   checksWin(gameState.board);
   checksTie();
+  if(gameState.singlePlayerMode && !(gameState.isWinner)) {
+    if(gameState.currentPlayerIndex === 1) {
+      setTimeout(() => {playComputerMove()}, 1000)
+      //playComputerMove()
+    }
+  }
 }
 
 function switchPlayers() {
@@ -100,7 +110,6 @@ function checksWin(gameBoard) {
   }
   checks.push(getDiagonals(gameBoard)[0]);
   checks.push(getDiagonals(gameBoard)[1]);
-  //console.log(checks);
   for (let i = 0; i < checks.length; i++) {
     findsWinner(checks[i]);
   }
@@ -114,6 +123,7 @@ button.classList.add("button");
 
 function findsWinner(array) {
   if (array[0] === "X" && array[1] === "X" && array[2] === "X") {
+    gameState.isWinner = true;
     const xWinMessage = document.createElement("p");
     xWinMessage.innerText = "X wins!";
     xWinMessage.classList.add("game-end-message");
@@ -122,6 +132,7 @@ function findsWinner(array) {
     board.removeEventListener("click", addPlayerMark)
   }
   if (array[0] === "O" && array[1] === "O" && array[2] === "O") {
+    gameState.isWinner = true;
     const oWinMessage = document.createElement("p");
     oWinMessage.innerText = "O wins!";
     oWinMessage.classList.add("game-end-message");
@@ -134,7 +145,7 @@ function findsWinner(array) {
 }
 
 function checksTie() {
-  console.log(gameState.board);
+  //console.log(gameState.board);
   for (let i = 0; i < gameState.board.length; i++) {
     for (let j = 0; j < gameState.board[i].length; j++) {
       const cell = gameState.board[i][j];
@@ -157,6 +168,7 @@ function resetBoard(event) {
     [null, null, null],
     [null, null, null],
   ]; 
+  gameState.isWinner = false;
   const cells = document.querySelectorAll(".cell");
   for(let cell of cells) {
     if(cell.hasChildNodes()) {
@@ -172,20 +184,45 @@ function resetBoard(event) {
 
 button.addEventListener("click", resetBoard);
 
-if(gameState.singlePlayerMode === "on") {
-  singlePlayerMode()
-}
-
 function singlePlayerMode() {
   const computerName = "Computer"
   playerO.innerText = "Player O: Computer"
   if(gameState.playerNames[0]) {
     gameState.playerNames.push(computerName)} 
-    if(gameState.currentPlayerIndex === 1) {
-      
-    }
 }
-const singlePlayerModeButton = document.querySelector("single-player-mode-button");
+
+function playComputerMove(){
+  // generate random idxs for row and col
+  // try to place the move at that position,
+  // if that position is already taken, you may need to generate a new row and col
+  let isSearching = true
+  while (isSearching) {
+    const row = Math.floor(Math.random() * 3);
+    const column = Math.floor(Math.random() * 3);
+    if(gameState.board[row][column] === null) {
+      isSearching = false;
+      let query = `${row},${column}`
+      const selectedSpace = document.getElementById(query)
+      selectedSpace.classList.add("taken");
+      gameState.board[row][column] = "O";
+      const playerMark = document.createElement("p");
+      playerMark.classList.add("player-mark");
+      playerMark.classList.add("orange");
+      playerMark.innerText = "O"
+      selectedSpace.appendChild(playerMark);
+      switchPlayers();
+      checksWin(gameState.board);
+      checksTie();
+    }
+  }
+ }
+const singlePlayerModeButton = document.querySelector("#single-player-mode-button");
+//console.log(singlePlayerModeButton)
 singlePlayerModeButton.addEventListener("click", (event) => {
-  gameState.singlePlayerMode === "on"
+  gameState.singlePlayerMode = true
+  if(gameState.singlePlayerMode) {
+    const computerName = "Computer"
+    playerO.innerText = "Player O: Computer"
+    singlePlayerMode()
+  }
 })
